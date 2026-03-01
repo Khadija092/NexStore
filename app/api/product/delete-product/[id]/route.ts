@@ -3,12 +3,15 @@ import { PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient();
 
+type Params = { params: { id: string } }; // ✅ type context correctly
+
 export async function PATCH(
   req: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: Params
 ) {
+  const { id } = params; // ✅ no await
+
   try {
-    const { id } = await params;
     const existingProduct = await prisma.product.findUnique({
       where: { id },
     });
@@ -22,14 +25,15 @@ export async function PATCH(
       where: { id },
       data: { isDeleted: 'deleted' },
     });
+
     await prisma.productVariant.updateMany({
       where: { productId: id },
       data: { availabilityStatus: 'INACTIVE' },
     });
     return NextResponse.json({
-      success: true,
-      message: 'Product and its variants marked inactive',
-      product,
+        success: true,
+        message: 'Product and its variants marked inactive',
+        product,
     }, { status: 200 });
   } catch (err: unknown) {
     const message = err instanceof Error ? err.message : 'Unknown error';

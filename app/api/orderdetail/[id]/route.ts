@@ -3,11 +3,14 @@ import { NextResponse, NextRequest } from 'next/server';
 
 const prisma = new PrismaClient();
 
+type Params = { params: { id: string } }; // ✅ fully typed
+
 export async function GET(
   req: NextRequest,
-  context: { params: { id: string } } // ✅ fix here
+  context: Params
 ) {
-  const { id } = context.params; // ✅ no await
+  const { id } = context.params; // ✅ typed, no casting needed
+
   try {
     const order = await prisma.order.findUnique({
       where: { id },
@@ -27,18 +30,21 @@ export async function GET(
         variant: true,
       },
     });
+
     const orderInfo = {
       id: order.id,
       name: order.user.fullname,
       total: order.total,
       date: order.createdAt,
     };
+
     const products = orderItems.map((item) => ({
       Title: item.product.title,
       Price: item.price,
       Quantity: item.quantity,
       image: item.variant.img,
     }));
+
     return NextResponse.json({ orderInfo, products }, { status: 200 });
   } catch (error) {
     console.error('Error fetching orders:', error);

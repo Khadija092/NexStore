@@ -4,33 +4,41 @@ import { auth } from '@/auth';
 
 const prisma = new PrismaClient();
 
+type Params = { params: { id: string } };
+
 export async function PATCH(
-  req: NextRequest, // <-- change here
-  { params }: { params: { id: string } } // <-- already correct
+  req: NextRequest,
+  context: Params
 ) {
-  const { id } = params;
+  const { id } = context.params; // ✅ properly typed
 
   try {
     const session = await auth();
     if (!session?.user?.email) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
+
     const user = await prisma.user.findUnique({
       where: { email: session.user.email },
     });
+
     if (!user) {
       return NextResponse.json({ error: 'User not found' }, { status: 404 });
     }
+
     if (user.role !== 'ADMIN') {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
     }
+
     const { status } = await req.json();
+
     if (!status || !['FULFILLED', 'CANCELLED', 'PAID'].includes(status)) {
       return NextResponse.json(
         { error: 'Invalid status value' },
         { status: 400 }
       );
     }
+
     const updatedOrder = await prisma.order.update({
       where: { id },
       data: { status },

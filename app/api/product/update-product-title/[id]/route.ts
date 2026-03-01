@@ -1,7 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 
-export async function PATCH(req: NextRequest, { params }: { params: { id: string } }) {
+export async function PATCH(
+  req: NextRequest,
+  { params }: { params: { id: string } }
+) {
   const { id } = params;
 
   try {
@@ -37,4 +40,4 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
       { status: 500 }
     );
   }
-}
+  }

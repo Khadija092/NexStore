@@ -1,14 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { PrismaClient } from '@prisma/client';
+import { prisma } from '@/lib/prisma'; // singleton import
 
-const prisma = new PrismaClient();
+type Params = { params: { productId: string } };
 
-export async function POST(
-  req: NextRequest, // <-- change here
-  { params }: { params: { productId: string } } // <-- destructured, correct type
-) {
+export async function POST(req: NextRequest, { params }: Params) {
+  const { productId } = params;
+
   try {
-    const { productId } = params;
     const body = await req.json();
     const { variants } = body as {
       variants: Array<{
@@ -34,6 +32,7 @@ export async function POST(
           { status: 400 }
         );
       }
+
       variantSet.add(key);
     }
 
