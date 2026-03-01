@@ -4,9 +4,10 @@ import { auth } from '@/auth';
 
 export async function PATCH(
   req: NextRequest,
-  context: { params: { id: string } } // ✅ plain object, matches Next.js expected type
+  { params }: { params: Promise<{ id: string }> } // ✅ params is now a Promise
 ) {
-  const { id } = context.params; // ✅ do NOT await
+  // Await the params before using them
+  const { id } = await params; // ✅ MUST await
 
   try {
     const session = await auth();
