@@ -3,13 +3,15 @@ import { PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient();
 
-type Params = { params: { id: string } }; // ✅ type context correctly
+// Update the type - params is now a Promise
+type Params = { params: Promise<{ id: string }> };
 
 export async function PATCH(
   req: NextRequest,
   { params }: Params
 ) {
-  const { id } = params; // ✅ no await
+  // Await the params before using them
+  const { id } = await params; // ✅ MUST await now
 
   try {
     const existingProduct = await prisma.product.findUnique({
@@ -38,5 +40,7 @@ export async function PATCH(
   } catch (err: unknown) {
     const message = err instanceof Error ? err.message : 'Unknown error';
     return NextResponse.json({ success: false, error: message }, { status: 500 });
+  } finally {
+    await prisma.$disconnect();
   }
 }
