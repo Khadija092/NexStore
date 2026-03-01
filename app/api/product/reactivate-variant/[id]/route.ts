@@ -3,11 +3,14 @@ import { PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient();
 
+// Update the type - params is now a Promise
 export async function PATCH(
   req: NextRequest,
-  context: { params: { id: string } } // ✅ change here
+  context: { params: Promise<{ id: string }> } // ✅ params is now a Promise
 ) {
-  const { id } = context.params; // ✅ no await
+  // Await the params before using them
+  const { id } = await context.params; // ✅ MUST await now
+  
   try {
     const existingVariant = await prisma.productVariant.findUnique({ where: { id } });
     if (!existingVariant) {
@@ -22,5 +25,7 @@ export async function PATCH(
   } catch (err: unknown) {
     const message = err instanceof Error ? err.message : 'Failed to reactivate variant';
     return NextResponse.json({ error: message }, { status: 500 });
+  } finally {
+    await prisma.$disconnect();
   }
 }

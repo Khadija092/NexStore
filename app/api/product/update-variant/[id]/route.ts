@@ -3,22 +3,28 @@ import { PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient();
 
+// Fix: params MUST be a Promise in Next.js 15
 export async function PUT(
   req: NextRequest,
-  context: { params: { id: string } } // ✅ fix: remove Promise
+  context: { params: Promise<{ id: string }> } // ✅ MUST be Promise, not plain object
 ) {
   try {
-    const { id } = context.params; // ✅ no await
+    // MUST await the params
+    const { id } = await context.params; // ✅ MUST await
+    
     const body = await req.json();
-    const { colour, colourcode, size, price, stock, img } = body;
+    const { colour, colourcode, size, price, stock, img, productId } = body;
+    
+    // Check for duplicate variant
     const duplicate = await prisma.productVariant.findFirst({
       where: {
         colour,
         size,
-        productId: body.productId,
+        productId: productId,
         NOT: { id },
       },
     });
+    
     if (duplicate) {
       return NextResponse.json(
         {
@@ -29,26 +35,29 @@ export async function PUT(
         { status: 400 }
       );
     }
+    
     const updatedVariant = await prisma.productVariant.update({
       where: { id },
       data: {
         colour,
         colourcode,
         size,
-        price:price,
+        price: price,
         stock: stock,
         img,
         updatedAt: new Date(),
       },
     });
+    
     return NextResponse.json({ success: true, variant: updatedVariant }, { status: 200 });
   } catch (error: unknown) {
     console.error('Error updating variant:', error);
-    const message =
-    error instanceof Error ? error.message : 'Internal server error';
+    const message = error instanceof Error ? error.message : 'Internal server error';
     return NextResponse.json(
       { success: false, error: message },
       { status: 500 }
     );
+  } finally {
+    await prisma.$disconnect();
   }
 }
