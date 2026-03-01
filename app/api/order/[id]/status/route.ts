@@ -2,13 +2,11 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { auth } from '@/auth';
 
-type Params = { params: { id: string } }; // ✅ plain object
-
 export async function PATCH(
   req: NextRequest,
-  { params }: Params
+  context: { params: { id: string } } // ✅ plain object, matches Next.js expected type
 ) {
-  const { id } = params;
+  const { id } = context.params; // ✅ do NOT await
 
   try {
     const session = await auth();
