@@ -3,8 +3,11 @@ import { NextResponse, NextRequest } from 'next/server';
 
 const prisma = new PrismaClient();
 
-export async function GET(req: NextRequest, context: { params: Promise<{ id: string }> }) {
-  const { id } = await context.params;
+export async function GET(
+  req: NextRequest,
+  context: { params: { id: string } } // ✅ fix here
+) {
+  const { id } = context.params; // ✅ no await
   try {
     const order = await prisma.order.findUnique({
       where: { id },

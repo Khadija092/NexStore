@@ -6,9 +6,9 @@ const prisma = new PrismaClient();
 
 export async function PATCH(
   req: Request,
-  context: { params: Promise<{ id: string }> }
+  context: { params: { id: string } } // ✅ fix here
 ) {
-  const { id } = await context.params;
+  const { id } = context.params; // ✅ no await
   try {
     const session = await auth();
     if (!session?.user?.email) {

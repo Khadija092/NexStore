@@ -1,14 +1,14 @@
-import { NextResponse,NextRequest} from 'next/server';
+import { NextResponse, NextRequest } from 'next/server';
 import { PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient();
 
 export async function PUT(
   req: NextRequest,
-  context: { params: Promise<{ id: string }> } 
+  context: { params: { id: string } } // ✅ fix: remove Promise
 ) {
   try {
-    const { id } = await context.params;
+    const { id } = context.params; // ✅ no await
     const body = await req.json();
     const { colour, colourcode, size, price, stock, img } = body;
     const duplicate = await prisma.productVariant.findFirst({

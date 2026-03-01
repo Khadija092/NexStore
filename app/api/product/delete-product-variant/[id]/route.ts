@@ -3,9 +3,12 @@ import { PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient();
 
-export async function PATCH(req: Request, context: { params: Promise<{ id: string }> }) {
+export async function PATCH(
+  req: Request,
+  context: { params: { id: string } } // ✅ change here
+) {
   try {
-    const { id } = await context.params;
+    const { id } = context.params; // ✅ no await
     const existingVariant = await prisma.productVariant.findUnique({
       where: { id },
     });
