@@ -5,20 +5,22 @@ const prisma = new PrismaClient();
 
 export async function POST(
   req: Request,
-  context: { params: Promise<{ productId: string }> }
+  context: { params: { productId: string } } // ✅ fix here
 ) {
   try {
-    const { productId } = await context.params;
+    const { productId } = context.params; // ✅ no 'await'
     const body = await req.json();
+
     const existingVariant = await prisma.productVariant.findUnique({
       where: {
-        productId_colour_size: {  
+        productId_colour_size: {
           productId,
           colour: body.colour,
-          size: body.size
-        }
-      }
+          size: body.size,
+        },
+      },
     });
+
     if (existingVariant) {
       return NextResponse.json(
         {
@@ -29,6 +31,7 @@ export async function POST(
         { status: 400 }
       );
     }
+
     const variant = await prisma.productVariant.create({
       data: {
         productId,
@@ -40,10 +43,10 @@ export async function POST(
         img: body.img,
       },
     });
+
     return NextResponse.json({ success: true, variant }, { status: 201 });
   } catch (err: unknown) {
-    const message =
-      err instanceof Error ? err.message : 'Failed to add variant';
+    const message = err instanceof Error ? err.message : 'Failed to add variant';
     return NextResponse.json({ success: false, error: message }, { status: 500 });
   }
 }
