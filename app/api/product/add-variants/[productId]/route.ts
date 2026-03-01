@@ -1,14 +1,14 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient();
 
 export async function POST(
-  req: Request,
-  context: { params: { productId: string } }
+  req: NextRequest, // <-- change here
+  { params }: { params: { productId: string } } // <-- destructured, correct type
 ) {
   try {
-    const { productId } = context.params;
+    const { productId } = params;
     const body = await req.json();
     const { variants } = body as {
       variants: Array<{

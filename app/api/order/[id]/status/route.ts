@@ -1,14 +1,15 @@
 import { PrismaClient } from '@prisma/client';
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/auth';
 
 const prisma = new PrismaClient();
 
 export async function PATCH(
-  req: Request,
-  context: { params: { id: string } } // ✅ fix here
+  req: NextRequest, // <-- change here
+  { params }: { params: { id: string } } // <-- already correct
 ) {
-  const { id } = context.params; // ✅ no await
+  const { id } = params;
+
   try {
     const session = await auth();
     if (!session?.user?.email) {

@@ -1,14 +1,14 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient();
 
 export async function POST(
-  req: Request,
-  context: { params: { productId: string } } // ✅ fix here
+  req: NextRequest, // <-- change here
+  { params }: { params: { productId: string } } // <-- already correct
 ) {
   try {
-    const { productId } = context.params; // ✅ no 'await'
+    const { productId } = params; // ✅ no 'await'
     const body = await req.json();
 
     const existingVariant = await prisma.productVariant.findUnique({
