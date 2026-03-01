@@ -1,16 +1,14 @@
-import { PrismaClient } from '@prisma/client';
 import { NextRequest, NextResponse } from 'next/server';
+import { prisma } from '@/lib/prisma';
 import { auth } from '@/auth';
 
-const prisma = new PrismaClient();
-
-type Params = { params: { id: string } };
+type Params = { params: { id: string } }; // ✅ plain object
 
 export async function PATCH(
   req: NextRequest,
-  context: Params
+  { params }: Params
 ) {
-  const { id } = context.params; // ✅ properly typed
+  const { id } = params;
 
   try {
     const session = await auth();
