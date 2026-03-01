@@ -1,13 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma'; // singleton import
 
-type Params = { params: { productId: string } };
+// Update the type - params is now a Promise
+type Params = { params: Promise<{ productId: string }> };
 
 export async function POST(
   req: NextRequest,
   { params }: Params
 ) {
-  const { productId } = params;
+  // Await the params before using them
+  const { productId } = await params; // ✅ MUST await now
+
   try {
     const body = await req.json();
 
@@ -48,5 +51,7 @@ export async function POST(
   } catch (err: unknown) {
     const message = err instanceof Error ? err.message : 'Failed to add variant';
     return NextResponse.json({ success: false, error: message }, { status: 500 });
+  } finally {
+    await prisma.$disconnect();
   }
 }
