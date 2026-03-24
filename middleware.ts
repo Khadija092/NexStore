@@ -66,7 +66,15 @@ function handleValidationError(error: unknown) {
 
 export async function middleware(req: NextRequest) {
   const url = new URL(req.url);
-  const path = url.pathname;
+const path = url.pathname;
+  if (path === '/user/frontend/shopping-cart') {
+    console.log('🛒 CART ACCESS ATTEMPT:', {
+      pathname: path,
+      origin: req.headers.get('origin'),
+      referer: req.headers.get('referer'),
+      userAgent: req.headers.get('user-agent')?.slice(0, 100),
+    });
+  }
   const searchParams = Object.fromEntries(url.searchParams.entries());
 
   // Single token declaration for both API and frontend routes
@@ -157,6 +165,12 @@ export async function middleware(req: NextRequest) {
   }
 
   //  FRONTEND ROUTES 
+  console.log('🔍 FRONTEND TOKEN FETCH:', {
+    pathname: path,
+    secureCookie: process.env.NODE_ENV === 'production',
+    nextauth_secret: !!process.env.NEXTAUTH_SECRET ? 'SET' : 'MISSING',
+    nextauth_url: process.env.NEXTAUTH_URL?.slice(0,50) || 'MISSING'
+  });
   token = await getToken({
     req,
     secret: process.env.NEXTAUTH_SECRET,
